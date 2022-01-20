@@ -36,4 +36,13 @@ class MenuController extends Controller
         // dd($menu_data);
         return view('content', compact('menu_data'));
     } 
+
+    public function store(Request $req) {
+        $req->validate([
+            'parent_id', 'order_column'
+        ]);
+
+        $menu->create($req->all());
+        return redirect()->route('/');
+    }
 }

@@ -5,29 +5,31 @@
     {{-- @dump($menu_data) --}}
 
     <div class="w-9/12 mx-auto">
-    <form action="post" name="module-menu" method="POST">
+    {{-- <form action="{{ route('store') }}" name="module-menu" method="POST"> --}}
+        {{-- @csrf --}}
+
         <table class="table-fixed border border-solid border-white w-full break-all">
             <thead>
                 <th class="p-2.5 border-b border-solid border-white w-1/12"></th>
-                <th class="p-2.5 border-b border-solid border-white w-1/5 text-left">name</th>
-                <th class="p-2.5 border-b border-solid border-white w-3/12 text-left">link</th>
+                <th class="p-2.5 border-b border-solid border-white text-left">name</th>
+                {{-- <th class="p-2.5 border-b border-solid border-white text-left">link</th> --}}
                 <th class="p-2.5 border-b border-solid border-white text-center">level</th>
                 <th class="p-2.5 border-b border-solid border-white text-center">order_column</th>
-                <th class="p-2.5 border-b border-solid border-white w-3/12"></th>
+                <th class="p-2.5 border-b border-solid border-white"></th>
             </thead>
             <tbody>
                 <?php $order = 1 ?>
                 @foreach ($menu_data['level1'] as $menu)
-                    <tr id="menu-{{ $menu->menu_id }}" class="menu">
+                    <tr id="menu-{{ $order }}" class="menu">
                         <td class="p-2.5 border-b border-solid border-white text-center">
                             {{ $order++ }}
                         </td>
                         <td class="p-2.5 border-b border-solid border-white">
                             {{ $menu->title }}
                         </td>
-                        <td class="p-2.5 border-b border-solid border-white">
+                        {{-- <td class="p-2.5 border-b border-solid border-white">
                             {{ $menu->url }}
-                        </td>
+                        </td> --}}
                         <td class="p-2.5 border-b border-solid border-white text-center">
                             {{ $menu->level }}
                         </td>
@@ -47,19 +49,20 @@
                     </tr>
               
                     @if (isset($menu_data['level2'][$menu->menu_id]))
+                        <?php $orderMain = $order - 1 ?>
                         <?php $orderSub = 1 ?>
                         @foreach ($menu_data['level2'][$menu->menu_id] as $menu_level2)
-                            <tr id="submenu-{{ $menu_level2->menu_id }}" class="submenu">
+                            <tr id="submenu-{{ $orderMain }}-{{ $orderSub }}" class="submenu">
                                 <td class="p-2.5 border-b border-solid border-white text-right">
                                     {{-- {{ $menu_level2->menu_id }} --}}
-                                    {{ $orderSub++ }}
+                                    {{ $orderMain }} - {{ $orderSub++ }}
                                 </td>
                                 <td class="p-2.5 border-b border-solid border-white">
                                     &emsp;&emsp;{{ $menu_level2->title }}
                                 </td>
-                                <td class="p-2.5 border-b border-solid border-white">
+                                {{-- <td class="p-2.5 border-b border-solid border-white">
                                     {{ $menu_level2->url }}
-                                </td>
+                                </td> --}}
                                 <td class="p-2.5 border-b border-solid border-white text-center">
                                     {{ $menu_level2->level }}
                                 </td>
@@ -83,7 +86,7 @@
                 @endforeach
             </tbody>
         </table>
-    </form>
+    {{-- </form> --}}
     </div>
 @endsection
 
@@ -97,28 +100,28 @@
         let j = {!! json_encode($menu_data) !!}
         console.log(j)
 
-        let x = $('.menu').each(function(index) {
-            let y = $(this).attr('id')
-            console.log(`${index} - ${y}`)
-        });
+        // let x = $('.menu').each(function(index) {
+        //     let y = $(this).attr('id')
+        //     console.log(`${index} - ${y}`)
+        // });
 
         $('table').on('click', '.up, .down', function(e) {
             e.preventDefault();
             var action    = ($(this).hasClass('down')) ? 'down' : 'up';
             var elm       = $(this).closest('.menu');
             var currentId = elm.attr('id');
-            var nextId    = elm.next().attr('id');
-            var prevId    = elm.prev().attr('id');
+            var nextId    = elm.nextAll('tr[class="menu"]:first').attr('id');
+            var prevId    = elm.prevAll('tr[class="menu"]:first').attr('id');
             var swapId    = (action == 'down') ? nextId : prevId;
 
-            console.log(currentId)
+            // console.log(prevId + ' ' + currentId + ' ' + nextId)
 
             if (swapId) {
 
                 $('#' + currentId).swap({
                     target: swapId,
                     opacity: '0.5',
-                    speed: 250,
+                    speed: 500,
                     callback: function() {
                         var first = $('#' + currentId);
                         var second = $('#' + swapId);
@@ -127,18 +130,22 @@
                         second.css('top', 0);
                         menuOrder();
 
+                        // location.reload();
                         // Save orders
-                        var orders = $('form[name="module-menu"]').serialize();
-                        // var url = urlWithoutParams() + '/orders';
+                        // var orders = $('form[name="module-menu"]').serialize();
+                        // var url = urlWithoutParams() + '/store';
 
-                        // $.post(url, orders).done(function (data) {});
+                        // $.post(orders).done(function (data) {});
 
-                        console.log(orders)
+                        // console.log(url)
 
                         // $('tr[class^="position"]').each(function() {
                         //     let x = $(this).attr('id')
                         //     console.log(x)
                         // });
+
+                        // let j = {!! json_encode($menu_data['level1']) !!}
+                        // console.log(j)
                     }
                 });
             }
@@ -157,13 +164,12 @@
 
         parent1.insertBefore(elm2, next1);
         parent2.insertBefore(elm1, next2);
-
     }
 
     function menuOrder() {
         let x = $('.menu').each(function(index) {
             let y = $(this).attr('id')
-            console.log(`${index} - ${y}`)
+            // console.log(`${index} - ${y}`)
         });
     }
 

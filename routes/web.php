@@ -19,3 +19,13 @@ use App\Http\Controllers\MenuController;
 // });
 
 Route::get('/', [MenuController::class, 'index']);
+
+Route::resource('/', MenuController::class);
+
+Route::get('/pdf', function () {
+    $data = [
+        'name'=>'test'
+    ];
+    $pdf = PDF::loadView('pdf', $data);
+    return @$pdf->stream();
+});
